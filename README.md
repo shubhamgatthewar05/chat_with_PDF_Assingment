@@ -3,6 +3,8 @@
 This project is a Flask-based web application that allows users to upload PDF files, extract and save their text content to MongoDB, and ask questions in real-time based on the PDF content. Flask-SocketIO is used for WebSocket connections to enable real-time Q&A responses.
 
 
+DEMO LINK :    https://youtu.be/9wVtZnIMF2o?si=cgovAO5O5wjvyJNn
+
 
 ## Table of Contents
 
