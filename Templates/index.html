@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Q&A Chat Application</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Body Styling */
+        body {
+            background-color: #f4f0fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* Main Container */
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header Styling */
+        h1 {
+            color: #7e57c2;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* Upload Form */
+        #uploadForm {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: #7e57c2;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+
+        button:hover {
+            background-color: #673ab7;
+        }
+
+        /* Chat Area */
+        .chat-history {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #f9f6ff;
+        }
+
+        .chat-bubble {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            line-height: 1.4;
+        }
+
+        .user-question {
+            background-color: #7e57c2;
+            color: #fff;
+            align-self: flex-end;
+            max-width: 80%;
+        }
+
+        .response-answer {
+            background-color: #e0d4f7;
+            color: #333;
+            align-self: flex-start;
+            max-width: 80%;
+        }
+
+        /* Question Input */
+        #questionInput {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        /* Status Message */
+        #uploadStatus {
+            margin-top: 10px;
+            padding: 10px;
+            font-size: 14px;
+            color: #7e57c2;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>PDF Q&A Chat Application</h1>
+
+        <!-- Upload PDF Section -->
+        <form id="uploadForm" enctype="multipart/form-data">
+            <input type="file" name="file" id="file" accept=".pdf">
+            <button type="button" onclick="uploadPDF()">Upload</button>
+        </form>
+        <div id="uploadStatus"></div>
+
+        <!-- Chat History Section -->
+        <div class="chat-history" id="chatHistory">
+            <!-- Previous Q&A will appear here -->
+        </div>
+
+        <!-- Question Input Section -->
+        <input type="text" id="questionInput" placeholder="Type your question here...">
+        <button onclick="askQuestion()">Ask</button>
+    </div>
+
+    <script>
+        const socket = io.connect('http://localhost:5000');
+
+        function uploadPDF() {
+            const formData = new FormData(document.getElementById('uploadForm'));
+
+            fetch('/upload_pdf', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('uploadStatus').innerText = data.message || data.error;
+                });
+        }
+
+        function askQuestion() {
+            const question = document.getElementById('questionInput').value;
+            const file = document.getElementById('file').files[0];
+
+            if (!file) {
+                alert("Please upload a PDF file first.");
+                return;
+            }
+            if (!question) {
+                alert("Please enter a question.");
+                return;
+            }
+
+            const fileName = file.name;
+
+            // Display the user's question in the chat history
+            displayMessage(question, 'user-question');
+
+            socket.emit('question', { file_name: fileName, question: question });
+            document.getElementById('questionInput').value = ''; // Clear the input
+        }
+
+        // Display incoming answers in the chat history
+        socket.on('answer', data => {
+            displayMessage(data.answer || data.error, 'response-answer');
+        });
+
+        // Helper function to display messages
+        function displayMessage(text, className) {
+            const chatHistory = document.getElementById('chatHistory');
+            const chatBubble = document.createElement('div');
+            chatBubble.classList.add('chat-bubble', className);
+            chatBubble.innerText = text;
+            chatHistory.appendChild(chatBubble);
+
+            // Auto-scroll to the latest message
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>
