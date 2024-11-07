@@ -6,7 +6,7 @@ import io
 import google.generativeai as genai
 
 
-genai.configure(api_key="AIzaSyDzqfbPaBWUFm-xnq5UEXuaEGI5RQbJ2Ck")
+genai.configure(api_key=" .....here you add your api key.............")
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 # Flask and SocketIO
