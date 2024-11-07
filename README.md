@@ -17,7 +17,7 @@ DEMO LINK :    https://youtu.be/9wVtZnIMF2o?si=cgovAO5O5wjvyJNn
 - [Project Structure](#project-structure)
 - [API Endpoints](#api-endpoints)
 - [WebSocket Events](#websocket-events)
-- [License](#license)
+
 
 ---
 
